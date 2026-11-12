@@ -45,6 +45,7 @@ def test_sale_is_frozen() -> None:
 def test_sales_report_stores_totals_and_optional_period() -> None:
     report = SalesReport(
         totals_by_product={"Notebook": Decimal("7000.00")},
+        quantity_by_product={"Notebook": 2},
         grand_total=Decimal("7000.00"),
         best_selling_product="Notebook",
         start_date=date(2026, 1, 1),
@@ -52,6 +53,7 @@ def test_sales_report_stores_totals_and_optional_period() -> None:
     )
 
     assert report.totals_by_product == {"Notebook": Decimal("7000.00")}
+    assert report.quantity_by_product == {"Notebook": 2}
     assert report.grand_total == Decimal("7000.00")
     assert report.best_selling_product == "Notebook"
     assert report.start_date == date(2026, 1, 1)
@@ -61,6 +63,7 @@ def test_sales_report_stores_totals_and_optional_period() -> None:
 def test_sales_report_defaults_to_no_product_or_period() -> None:
     report = SalesReport(
         totals_by_product={},
+        quantity_by_product={},
         grand_total=Decimal("0.00"),
         best_selling_product=None,
     )

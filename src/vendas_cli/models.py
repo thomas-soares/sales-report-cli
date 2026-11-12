@@ -18,6 +18,7 @@ class Sale:
 @dataclass(frozen=True)
 class SalesReport:
     totals_by_product: dict[str, Decimal]
+    quantity_by_product: dict[str, int]
     grand_total: Decimal
     best_selling_product: str | None
     start_date: date | None = None
