@@ -1,6 +1,6 @@
 # Sales Report CLI
 
-A Python command-line application for generating sales reports from CSV data.
+A Python package for loading sales data from CSV files, calculating sales reports, and rendering text or JSON output.
 
 ## Requirements
 
@@ -25,27 +25,41 @@ python -m pip install .
 vendas-cli --help
 ```
 
-Use `--help` to display the command-line options.
+The installed command currently provides its help output. The package APIs can be used from Python:
+
+```python
+from vendas_cli.core import generate_report
+from vendas_cli.output import render
+from vendas_cli.parser import parse_sales_csv
+
+parsed = parse_sales_csv("sample/vendas.csv")
+report = generate_report(parsed.sales)
+print(render(report))
+```
 
 ## CSV structure
 
-Sales data uses these columns:
+Sales data must include these columns:
 
 - `produto`
 - `quantidade`
 - `preco_unitario`
 - optional `data`
 
-The sample files in `sample/` show both required and optional-date variants:
+The `data` column is optional. The sample files in `sample/` show both variants:
 
 - [`sample/vendas.csv`](sample/vendas.csv)
 - [`sample/vendas-with-date.csv`](sample/vendas-with-date.csv)
 
 ## Business assumptions
 
-- Monetary values use `Decimal` to avoid floating-point precision issues.
-- The best-selling product is determined by quantity first, and by the total value if quantities tie.
-- If a date column is present, it is expected to use the `YYYY-MM-DD` format.
+- Dates are optional because the supplied sales data has no date column. If a date bound is applied, undated rows cannot be included reliably and are excluded.
+- The date column accepts `data`, `data_venda`, or `date`, regardless of capitalization, to accommodate common header variants.
+- CSV input is decoded as UTF-8 with an optional BOM, falling back to Latin-1 so legacy accented names can be read without an encoding option. CRLF line endings are supported for files created on Windows.
+- Invalid rows produce a warning and are skipped so valid rows can still be reported, while the log makes the ignored data visible.
+- Monetary values use `Decimal` to avoid binary floating-point precision errors in financial totals.
+- The best-selling product is ranked by quantity, then total sales value. Alphabetical product name resolves a complete tie so results remain consistent.
+- JSON monetary values are numbers formatted with two decimal places for predictable consumption by other software.
 
 ## Project layout
 
@@ -54,9 +68,15 @@ src/
   vendas_cli/
     __init__.py
     cli.py
+    core.py
     models.py
+    output.py
+    parser.py
 tests/
+  test_core.py
   test_models.py
+  test_output.py
+  test_parser.py
 sample/
   vendas.csv
   vendas-with-date.csv
